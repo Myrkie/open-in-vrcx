@@ -14,8 +14,6 @@
 
 (function() {
     'use strict';
-
-    let lastUrl = window.location.href;
     let UserButton;
     let AvatarButton;
 
