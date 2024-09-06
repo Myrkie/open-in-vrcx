@@ -2,8 +2,8 @@
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
 // @version      1.3.5
-// @updateURL    https://raw.githubusercontent.com/Myrkie/BoothDownloader/master/BoothDownloader/src/TamperMonkey/BoothDownloader%20URL%20Handler.user.js
-// @downloadURL  https://raw.githubusercontent.com/Myrkie/BoothDownloader/master/BoothDownloader/src/TamperMonkey/BoothDownloader%20URL%20Handler.user.js
+// @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
+// @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to user profiles and avatars;
 // @icon         https://www.google.com/s2/favicons?domain=vrchat.com
 // @author       Myrkur
