@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.3.6
+// @version      1.3.7
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to user profiles and avatars;
@@ -32,6 +32,7 @@
                 if (!document.querySelector('#OpenUserinVRCX')) {
                     addUserButton();
                 }
+                removeButton(UserButton);
                 removeButton(AvatarButton);
                 removeButton(WorldButton);
                 break;
@@ -40,6 +41,7 @@
                     addAvatarButton();
                 }
                 removeButton(UserButton);
+                removeButton(AvatarButton);
                 removeButton(WorldButton);
                 break;
             case currentURL.includes("/home/world/"):
@@ -48,6 +50,7 @@
                 }
                 removeButton(UserButton);
                 removeButton(AvatarButton);
+                removeButton(WorldButton);
                 break;
             default:
                 removeButton(UserButton);
