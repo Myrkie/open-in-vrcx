@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.3.8
+// @version      1.3.9
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to user profiles and avatars;
@@ -117,7 +117,12 @@
             addSVGIcon(WorldButton);
 
             WorldButton.onclick = function() {
-                const parsedId = window.location.href.split('/').pop();
+                let href = window.location.href;
+                if (href.includes('/info')) {
+                    href = href.substring(0, href.lastIndexOf('/info'));
+                }
+
+                const parsedId = href.split('/').pop();
                 const uriPath = new URL(`vrcx://world/${parsedId}`);
                 window.open(uriPath, '_self');
             };
