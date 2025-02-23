@@ -87,8 +87,12 @@
             addSVGIcon(UserButton);
 
             UserButton.onclick = function() {
-                const parsedId = window.location.href.split('/').pop();
-                const uriPath = new URL(`vrcx://user/${parsedId}`);
+                const userId = extractId(window.location.href, 'usr');
+                if (!userId) {
+                    console.error("User ID not found in URL");
+                    return;
+                }
+                const uriPath = new URL(`vrcx://user/${userId}`);
                 window.open(uriPath, '_self');
             };
 
@@ -108,8 +112,12 @@
             addSVGIcon(AvatarButton);
 
             AvatarButton.onclick = function() {
-                const parsedId = window.location.href.split('/').pop();
-                const uriPath = new URL(`vrcx://avatar/${parsedId}`);
+                const avatarId = extractId(window.location.href, 'avtr');
+                if (!avatarId) {
+                    console.error("Avatar ID not found in URL");
+                    return;
+                }
+                const uriPath = new URL(`vrcx://avatar/${avatarId}`);
                 window.open(uriPath, '_self');
             };
 
@@ -129,13 +137,12 @@
             addSVGIcon(WorldButton);
 
             WorldButton.onclick = function() {
-                let href = window.location.href;
-                if (href.includes('/info')) {
-                    href = href.substring(0, href.lastIndexOf('/info'));
+                const worldId = extractId(window.location.href, 'wrld');
+                if (!worldId) {
+                    console.error("World ID not found in URL");
+                    return;
                 }
-
-                const parsedId = href.split('/').pop();
-                const uriPath = new URL(`vrcx://world/${parsedId}`);
+                const uriPath = new URL(`vrcx://world/${worldId}`);
                 window.open(uriPath, '_self');
             };
 
@@ -155,24 +162,23 @@
             addSVGIcon(GroupButton);
 
             GroupButton.onclick = function() {
-                let href = window.location.href;
-                let pageTabs = ['/posts', '/instances', '/galleries', '/members', '/invites', '/settings', '/bans']
-
-                if (pageTabs.some(str => href.includes(str))) {
-                    let match = href.match(/group\/([^\/]+)/);
-                    
-                    const parsedId = match ? match[1] : null;
-                    const uriPath = new URL(`vrcx://group/${parsedId}`);
-                    window.open(uriPath, '_self');
+                const groupId = extractId(window.location.href, 'grp');
+                if (!groupId) {
+                    console.error("Group ID not found in URL");
+                    return;
                 }
-
-                const parsedId = href.split('/').pop();
-                const uriPath = new URL(`vrcx://group/${parsedId}`);
+                const uriPath = new URL(`vrcx://group/${groupId}`);
                 window.open(uriPath, '_self');
             };
 
             navbarSection.appendChild(GroupButton);
         }
+    }
+
+    function extractId(url, idType) {
+        let expression = `/(${idType}_[a-zA-Z0-9-]+)/`;
+        const match = url.match(expression);
+        return match ? match[1] : null;
     }
 
     function addSVGIcon(button) {
