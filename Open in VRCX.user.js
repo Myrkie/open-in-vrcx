@@ -15,7 +15,7 @@
 (function() {
     'use strict';
 
-    let UserButton, AvatarButton, WorldButton;
+    let UserButton, AvatarButton, WorldButton, GroupButton;
     let debounceTimer;
 
     function debounce(fn, delay) {
@@ -32,6 +32,7 @@
                 if (!document.querySelector('#OpenUserinVRCX')) {
                     addUserButton();
                 }
+                removeButton(GroupButton);
                 removeButton(AvatarButton);
                 removeButton(WorldButton);
                 break;
@@ -39,6 +40,7 @@
                 if (!document.querySelector('#OpenAvatarinVRCX')) {
                     addAvatarButton();
                 }
+                removeButton(GroupButton);
                 removeButton(UserButton);
                 removeButton(WorldButton);
                 break;
@@ -46,10 +48,20 @@
                 if (!document.querySelector('#OpenWorldinVRCX')) {
                     addWorldButton();
                 }
+                removeButton(GroupButton);
+                removeButton(UserButton);
+                removeButton(AvatarButton);
+                break;
+            case currentURL.includes("/home/group/"):
+                if (!document.querySelector('#OpenGroupinVRCX')) {
+                    addGroupButton();
+                }
+                removeButton(WorldButton);
                 removeButton(UserButton);
                 removeButton(AvatarButton);
                 break;
             default:
+                removeButton(GroupButton);
                 removeButton(UserButton);
                 removeButton(AvatarButton);
                 removeButton(WorldButton);
@@ -128,6 +140,27 @@
             };
 
             navbarSection.appendChild(WorldButton);
+        }
+    }
+
+    function addGroupButton() {
+        let navbarSection = document.querySelector('.navbar-section.left-nav');
+
+        if (navbarSection) {
+            GroupButton = document.createElement('button');
+            GroupButton.id = 'OpenGroupinVRCX';
+            GroupButton.innerText = 'Open Group in VRCX';
+
+            GroupButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
+            addSVGIcon(GroupButton);
+
+            GroupButton.onclick = function() {
+                const parsedId = window.location.href.split('/').pop();
+                const uriPath = new URL(`vrcx://group/${parsedId}`);
+                window.open(uriPath, '_self');
+            };
+
+            navbarSection.appendChild(GroupButton);
         }
     }
 
