@@ -176,7 +176,7 @@
     }
 
     function extractId(url, idType) {
-        let expression = `/(${idType}_[a-zA-Z0-9-]+)/`;
+        let expression = `/(${idType}_[a-zA-Z0-9-]+)(?=\/|$)/`;
         const match = url.match(expression);
         return match ? match[1] : null;
     }
