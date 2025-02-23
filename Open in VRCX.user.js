@@ -15,7 +15,7 @@
 (function() {
     'use strict';
 
-    let UserButton, AvatarButton, WorldButton, GroupButton;
+    let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton;
     let debounceTimer;
 
     function debounce(fn, delay) {
@@ -35,10 +35,12 @@
                 removeButton(GroupButton);
                 removeButton(AvatarButton);
                 removeButton(WorldButton);
+                removeButton(SwapButton);
                 break;
             case currentURL.includes("/home/avatar/"):
                 if (!document.querySelector('#OpenAvatarinVRCX')) {
                     addAvatarButton();
+                    addAvatarSwapButton();
                 }
                 removeButton(GroupButton);
                 removeButton(UserButton);
@@ -51,6 +53,7 @@
                 removeButton(GroupButton);
                 removeButton(UserButton);
                 removeButton(AvatarButton);
+                removeButton(SwapButton);
                 break;
             case currentURL.includes("/home/group/"):
                 if (!document.querySelector('#OpenGroupinVRCX')) {
@@ -59,12 +62,14 @@
                 removeButton(WorldButton);
                 removeButton(UserButton);
                 removeButton(AvatarButton);
+                removeButton(SwapButton);
                 break;
             default:
                 removeButton(GroupButton);
                 removeButton(UserButton);
                 removeButton(AvatarButton);
                 removeButton(WorldButton);
+                removeButton(SwapButton);
                 break;
         }
     }
@@ -110,7 +115,6 @@
 
             AvatarButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
             addSVGIcon(AvatarButton);
-
             AvatarButton.onclick = function() {
                 const avatarId = extractId(window.location.href, 'avtr');
                 if (!avatarId) {
@@ -122,6 +126,30 @@
             };
 
             navbarSection.appendChild(AvatarButton);
+        }
+    }
+
+    function addAvatarSwapButton() {
+        let navbarSection = document.querySelector('.navbar-section.left-nav');
+
+        if (navbarSection) {
+            SwapButton = document.createElement('button');
+            SwapButton.id = 'SwapAvatarinVRCX';
+            SwapButton.innerText = 'Swap to Avatar in VRChat';
+
+            SwapButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
+            addSVGIcon(SwapButton);
+            SwapButton.onclick = function() {
+                const avatarId = extractId(window.location.href, 'avtr');
+                if (!avatarId) {
+                    console.error("Avatar ID not found in URL");
+                    return;
+                }
+                const uriPath = new URL(`vrcx://switchavatar/${avatarId}`);
+                window.open(uriPath, '_self');
+            };
+
+            navbarSection.appendChild(SwapButton);
         }
     }
 
