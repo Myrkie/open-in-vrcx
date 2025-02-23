@@ -176,9 +176,17 @@
     }
 
     function extractId(url, idType) {
+        if(idType === "usr" && getLegacyID(url).length === 10){
+            return getLegacyID(url);
+        }
         let expression = new RegExp(`(${idType}_[a-zA-Z0-9-]+)(?:/|$)`);
         const match = url.match(expression);
         return match ? match[1] : null;
+    }
+
+    function getLegacyID(input) {
+        const parts = input.split("/");
+        return parts.pop();
     }
 
     function addSVGIcon(button) {
