@@ -15,7 +15,7 @@
 (function() {
     'use strict';
 
-    let UserButton, AvatarButton, WorldButton;
+    let UserButton, AvatarButton, WorldButton, GroupButton;
     let debounceTimer;
 
     function debounce(fn, delay) {
@@ -32,6 +32,7 @@
                 if (!document.querySelector('#OpenUserinVRCX')) {
                     addUserButton();
                 }
+                removeButton(GroupButton);
                 removeButton(AvatarButton);
                 removeButton(WorldButton);
                 break;
@@ -39,6 +40,7 @@
                 if (!document.querySelector('#OpenAvatarinVRCX')) {
                     addAvatarButton();
                 }
+                removeButton(GroupButton);
                 removeButton(UserButton);
                 removeButton(WorldButton);
                 break;
@@ -46,10 +48,20 @@
                 if (!document.querySelector('#OpenWorldinVRCX')) {
                     addWorldButton();
                 }
+                removeButton(GroupButton);
+                removeButton(UserButton);
+                removeButton(AvatarButton);
+                break;
+            case currentURL.includes("/home/group/"):
+                if (!document.querySelector('#OpenGroupinVRCX')) {
+                    addGroupButton();
+                }
+                removeButton(WorldButton);
                 removeButton(UserButton);
                 removeButton(AvatarButton);
                 break;
             default:
+                removeButton(GroupButton);
                 removeButton(UserButton);
                 removeButton(AvatarButton);
                 removeButton(WorldButton);
@@ -75,8 +87,12 @@
             addSVGIcon(UserButton);
 
             UserButton.onclick = function() {
-                const parsedId = window.location.href.split('/').pop();
-                const uriPath = new URL(`vrcx://user/${parsedId}`);
+                const userId = extractId(window.location.href, 'usr');
+                if (!userId) {
+                    console.error("User ID not found in URL");
+                    return;
+                }
+                const uriPath = new URL(`vrcx://user/${userId}`);
                 window.open(uriPath, '_self');
             };
 
@@ -96,8 +112,12 @@
             addSVGIcon(AvatarButton);
 
             AvatarButton.onclick = function() {
-                const parsedId = window.location.href.split('/').pop();
-                const uriPath = new URL(`vrcx://avatar/${parsedId}`);
+                const avatarId = extractId(window.location.href, 'avtr');
+                if (!avatarId) {
+                    console.error("Avatar ID not found in URL");
+                    return;
+                }
+                const uriPath = new URL(`vrcx://avatar/${avatarId}`);
                 window.open(uriPath, '_self');
             };
 
@@ -117,18 +137,48 @@
             addSVGIcon(WorldButton);
 
             WorldButton.onclick = function() {
-                let href = window.location.href;
-                if (href.includes('/info')) {
-                    href = href.substring(0, href.lastIndexOf('/info'));
+                const worldId = extractId(window.location.href, 'wrld');
+                if (!worldId) {
+                    console.error("World ID not found in URL");
+                    return;
                 }
-
-                const parsedId = href.split('/').pop();
-                const uriPath = new URL(`vrcx://world/${parsedId}`);
+                const uriPath = new URL(`vrcx://world/${worldId}`);
                 window.open(uriPath, '_self');
             };
 
             navbarSection.appendChild(WorldButton);
         }
+    }
+
+    function addGroupButton() {
+        let navbarSection = document.querySelector('.navbar-section.left-nav');
+
+        if (navbarSection) {
+            GroupButton = document.createElement('button');
+            GroupButton.id = 'OpenGroupinVRCX';
+            GroupButton.innerText = 'Open Group in VRCX';
+
+            GroupButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
+            addSVGIcon(GroupButton);
+
+            GroupButton.onclick = function() {
+                const groupId = extractId(window.location.href, 'grp');
+                if (!groupId) {
+                    console.error("Group ID not found in URL");
+                    return;
+                }
+                const uriPath = new URL(`vrcx://group/${groupId}`);
+                window.open(uriPath, '_self');
+            };
+
+            navbarSection.appendChild(GroupButton);
+        }
+    }
+
+    function extractId(url, idType) {
+        let expression = new RegExp(`(${idType}_[a-zA-Z0-9-]+)(?:/|$)`);
+        const match = url.match(expression);
+        return match ? match[1] : null;
     }
 
     function addSVGIcon(button) {
