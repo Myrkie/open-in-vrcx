@@ -3,7 +3,7 @@ A userscript to add various "Open in VRCX" buttons to the VRChat website.
 
 
 
-# [Click here to install](Open%20in%20VRCX.user.js)
+# [Click here to install](https://github.com/Myrkie/open-in-vrcx/raw/refs/heads/mistress/Open%20in%20VRCX.user.js)
 ## Selecting a User
 ![The VRChat website navigation bar with an added "Open User in VRCX" button.](https://github.com/user-attachments/assets/3a20d315-af14-489f-acc1-cccf4a8ccf22)
 
