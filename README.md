@@ -1,11 +1,15 @@
 # open-in-vrcx
-Userscript to add vrcx protocol support to vrchats website.
+A userscript to add various "Open in VRCX" buttons to the VRChat website.
 
 
-# Selecting a user
-![user_select](https://github.com/user-attachments/assets/0467b618-2e03-450f-b3b3-925d1aeab9f7)
+## Selecting a User
+![The VRChat website navigation bar with an added "Open User in VRCX" button.](https://github.com/user-attachments/assets/3a20d315-af14-489f-acc1-cccf4a8ccf22)
 
+## Selecting an Avatar
+![The VRChat website navigation bar with an added "Open Avatar in VRCX" button.](https://github.com/user-attachments/assets/cda22bf5-a207-43a9-9c94-bf961394b695)
 
-# Selecting a avatar
+## Selecting a World
+![The VRChat website navigation bar with an added "Open World in VRCX" button.](https://github.com/user-attachments/assets/6542e918-82fe-475a-a2e9-1e123c9966eb)
 
-![avatar_select](https://github.com/user-attachments/assets/ef26735b-560f-4507-a032-a97a091bc3ab)
+## Selecting a Group
+![The VRChat website navigation bar with an added "Open Group in VRCX" button.](https://github.com/user-attachments/assets/299dd9bf-3aff-43f2-8121-5ab764e47518)
