@@ -155,7 +155,18 @@
             addSVGIcon(GroupButton);
 
             GroupButton.onclick = function() {
-                const parsedId = window.location.href.split('/').pop();
+                let href = window.location.href;
+                let pageTabs = ['/posts', '/instances', '/galleries', '/members', '/invites', '/settings', '/bans']
+
+                if (pageTabs.some(str => href.includes(str))) {
+                    let match = href.match(/group\/([^\/]+)/);
+                    
+                    const parsedId = match ? match[1] : null;
+                    const uriPath = new URL(`vrcx://group/${parsedId}`);
+                    window.open(uriPath, '_self');
+                }
+
+                const parsedId = href.split('/').pop();
                 const uriPath = new URL(`vrcx://group/${parsedId}`);
                 window.open(uriPath, '_self');
             };
