@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.4.3
+// @version      1.4.4
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
@@ -109,7 +109,7 @@
         }
     });
 
-    GM_registerMenuCommand('⚙️ Open in VRCX Settings', function() {
+    GM_registerMenuCommand('Open in VRCX Settings', function() {
         GM_config.open();
     });
 
