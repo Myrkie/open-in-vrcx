@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.4.4
+// @version      1.4.5
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
@@ -17,8 +17,8 @@
 
 (function() {
     'use strict';
-
-    let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton, LaunchButton;
+    const cachedURI = window.location.href;
+    let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton, LaunchButton, overrideLaunch;
     let debounceTimer;
 
     // noinspection JSUnusedGlobalSymbols
@@ -165,6 +165,11 @@
                     addLaunchButton();
                 }
                 break;
+            case currentURL.includes("/home/login"):
+                if(!document.querySelector('#OverrideLaunchVRCX')) {
+                    VRCXOverrideLaunch();
+                }
+                break;
             default:
                 removeButton(GroupButton);
                 removeButton(UserButton);
@@ -192,7 +197,9 @@
             UserButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
             addSVGIcon(UserButton);
 
-            UserButton.onclick = function() {
+            UserButton.onclick = function(event) {
+                event.preventDefault();
+                
                 const userId = extractId(window.location.href, 'usr');
                 if (!userId) {
                     console.error("User ID not found in URL");
@@ -214,9 +221,10 @@
             LaunchButton.innerText = 'Open in VRCX';
 
             LaunchButton.classList.add('btn-primary', 'launch-btn', 'secondary-launch-btn', 'w-100', 'btn', 'btn-secondary');
-            addSVGIcon(LaunchButton);
 
-            LaunchButton.onclick = function() {
+            LaunchButton.onclick = function(event) {
+                event.preventDefault();
+
                 const uriPath = new URL(`vrcx://world/${window.location.href}`);
                 window.open(uriPath, '_self');
             };
@@ -224,7 +232,62 @@
             launchSelector.appendChild(LaunchButton);
         }
     }
+    function VRCXOverrideLaunch() {
+        const result = checkUrlMatch(cachedURI);
+        const id = extractId(cachedURI, result.type);
+        if(result.matched)
+        {
+            let overrideSelector = document.querySelector('.tw-border-hr-line-color.tw-border-y-2.tw-w-full.tw-mb-0');
+    
+            if (overrideSelector) {
+                let overrideLaunch = document.createElement('button');
+                overrideLaunch.id = 'OverrideLaunchVRCX';
+                overrideLaunch.innerText = 'Open cached link in VRCX';
+                overrideLaunch.style.border = '2px solid rgb(6, 75, 92)';
+                overrideLaunch.style.borderRadius = '4px';
+                overrideLaunch.style.background = 'rgb(6, 75, 92)';
+                overrideLaunch.style.color = 'rgb(106, 227, 249)';
+                overrideLaunch.style.padding = '5px';
+                overrideLaunch.style.boxSizing = 'border-box';
+                overrideLaunch.style.outline = 'none !important';
+                overrideLaunch.style.flex = '1 1 0%';
+                
+    
+                overrideLaunch.onclick = function(event) {
+                    event.preventDefault();
+                    
+                    const uriPath = new URL(`vrcx://${result.pattern}/${id}`);
+                    window.open(uriPath, '_self');
+                };
+    
+                overrideSelector.insertAdjacentElement('afterend', overrideLaunch);
+            }
+        }
+    }
+    function checkUrlMatch(url) {
+        url = String(url);
+        const patterns = [
+            { pattern: "/home/user/", shorthand: "user", type: "usr" },
+            { pattern: "/home/avatar/", shorthand: "avatar", type: "avtr" },
+            { pattern: "/home/world/", shorthand: "world", type: "wrld" },
+            { pattern: "/home/group/", shorthand: "group", type: "grp" }
+        ];
 
+        console.log(`Checking URL: ${url}`);
+
+        for (let { pattern, shorthand, type } of patterns) {
+            if (url.includes(pattern)) {
+                console.log(`URL matches pattern: ${pattern}`);
+                return { matched: true, pattern: shorthand, type: type };
+            }
+        }
+
+        console.log("URL does not match any of the patterns.");
+        return { matched: false, pattern: null, type: null };
+    }
+
+
+    
     function addAvatarButton() {
         let navbarSection = document.querySelector('.navbar-section.left-nav');
 
@@ -235,7 +298,9 @@
 
             AvatarButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
             addSVGIcon(AvatarButton);
-            AvatarButton.onclick = function() {
+            AvatarButton.onclick = function(event) {
+                event.preventDefault();
+                
                 const avatarId = extractId(window.location.href, 'avtr');
                 if (!avatarId) {
                     console.error("Avatar ID not found in URL");
@@ -259,7 +324,9 @@
 
             SwapButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
             addSVGIcon(SwapButton);
-            SwapButton.onclick = function() {
+            SwapButton.onclick = function(event) {
+                event.preventDefault();
+                
                 const avatarId = extractId(window.location.href, 'avtr');
                 if (!avatarId) {
                     console.error("Avatar ID not found in URL");
@@ -284,7 +351,9 @@
             WorldButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
             addSVGIcon(WorldButton);
 
-            WorldButton.onclick = function() {
+            WorldButton.onclick = function(event) {
+                event.preventDefault();
+                
                 const worldId = extractId(window.location.href, 'wrld');
                 if (!worldId) {
                     console.error("World ID not found in URL");
@@ -309,7 +378,9 @@
             GroupButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
             addSVGIcon(GroupButton);
 
-            GroupButton.onclick = function() {
+            GroupButton.onclick = function(event) {
+                event.preventDefault();
+                
                 const groupId = extractId(window.location.href, 'grp');
                 if (!groupId) {
                     console.error("Group ID not found in URL");
