@@ -15,7 +15,7 @@
 (function() {
     'use strict';
 
-    let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton;
+    let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton, LaunchButton;
     let debounceTimer;
 
     function debounce(fn, delay) {
@@ -64,6 +64,11 @@
                 removeButton(AvatarButton);
                 removeButton(SwapButton);
                 break;
+            case currentURL.includes("/home/launch"):
+                if(!document.querySelector('#OpenLaunchVRCX')) {
+                    addLaunchButton();
+                }
+                break;
             default:
                 removeButton(GroupButton);
                 removeButton(UserButton);
@@ -102,6 +107,25 @@
             };
 
             navbarSection.appendChild(UserButton);
+        }
+    }
+    function addLaunchButton() {
+        let launchSelector = document.querySelector('.css-1qycygp.flex-shrink-1.text-left');
+
+        if (launchSelector) {
+            LaunchButton = document.createElement('button');
+            LaunchButton.id = 'OpenLaunchVRCX';
+            LaunchButton.innerText = 'Open in VRCX';
+
+            LaunchButton.classList.add('btn-primary', 'launch-btn', 'secondary-launch-btn', 'w-100', 'btn', 'btn-secondary');
+            addSVGIcon(LaunchButton);
+
+            LaunchButton.onclick = function() {
+                const uriPath = new URL(`vrcx://world/${window.location.href}`);
+                window.open(uriPath, '_self');
+            };
+
+            launchSelector.appendChild(LaunchButton);
         }
     }
 
