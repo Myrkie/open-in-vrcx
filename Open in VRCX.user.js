@@ -1,15 +1,18 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.4.2
+// @version      1.4.3
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
 // @icon         https://www.google.com/s2/favicons?domain=vrchat.com
 // @author       Myrkur
 // @match        https://vrchat.com/*
+// @require      https://openuserjs.org/src/libs/sizzle/GM_config.js
+// @grant        GM_getValue
+// @grant        GM_setValue
+// @grant        GM_registerMenuCommand
 // @match        https://vrchat.net/*
-// @grant        none
 // ==/UserScript==
 
 (function() {
@@ -17,6 +20,99 @@
 
     let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton;
     let debounceTimer;
+
+    // noinspection JSUnusedGlobalSymbols
+    GM_config.init({
+        id: 'OpenInVRCXSettings',
+        title: 'Open In VRCX Settings',
+        fields: {
+            reloadTime: {
+                label: '<span title="Set how often the page reloads in milliseconds. Lower values may cause excessive reloads and page slowdowns">Reload Interval (Milliseconds) ⓘ</span>',
+                type: 'int',
+                default: 100
+            }
+        },
+        css: `
+        #html {
+            color: white;
+        }
+        #OpenInVRCXSettings {
+            background: #0e0e0e;
+            padding: 20px;
+            border: 1px solid magenta;
+            border-radius: 8px;
+            box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            color: white;
+            font-family: Arial, sans-serif;
+            width: 350px;
+        }
+        #OpenInVRCXSettings .config_header {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+            color: white;
+        }
+        #OpenInVRCXSettings .section_header {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: white;
+        }
+        #OpenInVRCXSettings input[type="text"],
+        #OpenInVRCXSettings input[type="number"] {
+            background: #222;
+            color: white;
+            border: 1px solid magenta;
+            padding: 5px;
+            border-radius: 4px;
+            width: 100%;
+        }
+        #OpenInVRCXSettings .saveclose_buttons {
+            text-align: center;
+            margin-top: 10px;
+            border: 1px solid magenta;
+            background: #222;
+            color: white;
+        }
+        #OpenInVRCXSettings_resetLink {
+            color: white;
+        }
+        #OpenInVRCXSettings .field_label{
+            color: magenta;
+            font-size: 14px;
+        }
+        #OpenInVRCXSettings .reset_holder a {
+            color: white;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+    `,
+        events: {
+            init: function () {
+                let reloadTime = this.get('reloadTime');
+                console.log("Initialized Reload Time:", reloadTime);
+
+                const observer = new MutationObserver(debounce(() => {
+                    addButtonToNavbar();
+                }, reloadTime));
+
+                observer.observe(document.querySelector('.navbar-section.left-nav') || document.body, { childList: true, subtree: true });
+            },
+            save: function () {
+                let reloadTime = this.get('reloadTime');
+                console.log("Saved Reload Time:", reloadTime);
+                location.reload();
+            }
+        }
+    });
+
+    GM_registerMenuCommand('⚙️ Open in VRCX Settings', function() {
+        GM_config.open();
+    });
+
 
     function debounce(fn, delay) {
         return function(...args) {
@@ -225,12 +321,5 @@
             button.insertBefore(svgClone, button.firstChild);
         }
     }
-
-    const observer = new MutationObserver(debounce((mutations) => {
-        addButtonToNavbar();
-    }, 500));
-
-    observer.observe(document.querySelector('.navbar-section.left-nav') || document.body, { childList: true, subtree: true });
-
     window.addEventListener('load', addButtonToNavbar);
 })();
