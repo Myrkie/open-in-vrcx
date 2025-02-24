@@ -306,7 +306,7 @@
             let overrideSelector = document.querySelector('.tw-border-hr-line-color.tw-border-y-2.tw-w-full.tw-mb-0');
 
             if (overrideSelector) {
-                let overrideLaunch = document.createElement('button');
+                overrideLaunch = document.createElement('button');
                 overrideLaunch.id = 'OverrideLaunchVRCX';
                 overrideLaunch.innerText = 'Open link in VRCX';
                 overrideLaunch.style.border = '2px solid rgb(6, 75, 92)';
