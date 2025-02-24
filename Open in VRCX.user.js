@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.4.5
+// @version      1.4.6
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
@@ -20,16 +20,24 @@
     const cachedURI = window.location.href;
     let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton, LaunchButton, overrideLaunch;
     let debounceTimer;
-
+    
+    //#region settings
+    let reloadTime;
+    let redirectAutoLaunch;
     // noinspection JSUnusedGlobalSymbols
     GM_config.init({
         id: 'OpenInVRCXSettings',
         title: 'Open In VRCX Settings',
         fields: {
             reloadTime: {
-                label: '<span title="Set how often the page reloads in milliseconds. Lower values may cause excessive reloads and page slowdowns">Reload Interval (Milliseconds) ⓘ</span>',
+                label: '<span title="Set how often the page reloads in milliseconds. Lower values may cause excessive reloads and page slowdowns.">Reload Interval (Milliseconds) ⓘ</span>',
                 type: 'int',
                 default: 100
+            },
+            redirectAutoLaunch: {
+                label: '<span title="Auto open urls in VRCX when redirected to the login screen.">Auto Launch Redirect ⓘ</span>',
+                type: 'checkbox',
+                default: false
             }
         },
         css: `
@@ -88,11 +96,11 @@
             display: inline-block;
             margin-top: 10px;
         }
-
     `,
         events: {
             init: function () {
-                let reloadTime = this.get('reloadTime');
+                reloadTime = this.get('reloadTime');
+                redirectAutoLaunch = this.get('redirectAutoLaunch');
                 console.log("Initialized Reload Time:", reloadTime);
 
                 const observer = new MutationObserver(debounce(() => {
@@ -102,8 +110,7 @@
                 observer.observe(document.querySelector('.navbar-section.left-nav') || document.body, { childList: true, subtree: true });
             },
             save: function () {
-                let reloadTime = this.get('reloadTime');
-                console.log("Saved Reload Time:", reloadTime);
+                console.log("Settings Saved!");
                 location.reload();
             }
         }
@@ -112,15 +119,8 @@
     GM_registerMenuCommand('Open in VRCX Settings', function() {
         GM_config.open();
     });
-
-
-    function debounce(fn, delay) {
-        return function(...args) {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => fn.apply(this, args), delay);
-        };
-    }
-
+    //#endregion
+    
     function addButtonToNavbar() {
         const currentURL = window.location.href;
         switch (true) {
@@ -180,12 +180,6 @@
         }
     }
 
-    function removeButton(button) {
-        if (button) {
-            button.remove();
-        }
-    }
-
     function addUserButton() {
         let navbarSection = document.querySelector('.navbar-section.left-nav');
 
@@ -212,82 +206,6 @@
             navbarSection.appendChild(UserButton);
         }
     }
-    function addLaunchButton() {
-        let launchSelector = document.querySelector('.css-1qycygp.flex-shrink-1.text-left');
-
-        if (launchSelector) {
-            LaunchButton = document.createElement('button');
-            LaunchButton.id = 'OpenLaunchVRCX';
-            LaunchButton.innerText = 'Open in VRCX';
-
-            LaunchButton.classList.add('btn-primary', 'launch-btn', 'secondary-launch-btn', 'w-100', 'btn', 'btn-secondary');
-
-            LaunchButton.onclick = function(event) {
-                event.preventDefault();
-
-                const uriPath = new URL(`vrcx://world/${window.location.href}`);
-                window.open(uriPath, '_self');
-            };
-
-            launchSelector.appendChild(LaunchButton);
-        }
-    }
-    function VRCXOverrideLaunch() {
-        const result = checkUrlMatch(cachedURI);
-        const id = extractId(cachedURI, result.type);
-        if(result.matched)
-        {
-            let overrideSelector = document.querySelector('.tw-border-hr-line-color.tw-border-y-2.tw-w-full.tw-mb-0');
-    
-            if (overrideSelector) {
-                let overrideLaunch = document.createElement('button');
-                overrideLaunch.id = 'OverrideLaunchVRCX';
-                overrideLaunch.innerText = 'Open cached link in VRCX';
-                overrideLaunch.style.border = '2px solid rgb(6, 75, 92)';
-                overrideLaunch.style.borderRadius = '4px';
-                overrideLaunch.style.background = 'rgb(6, 75, 92)';
-                overrideLaunch.style.color = 'rgb(106, 227, 249)';
-                overrideLaunch.style.padding = '5px';
-                overrideLaunch.style.boxSizing = 'border-box';
-                overrideLaunch.style.outline = 'none !important';
-                overrideLaunch.style.flex = '1 1 0%';
-                
-    
-                overrideLaunch.onclick = function(event) {
-                    event.preventDefault();
-                    
-                    const uriPath = new URL(`vrcx://${result.pattern}/${id}`);
-                    window.open(uriPath, '_self');
-                };
-    
-                overrideSelector.insertAdjacentElement('afterend', overrideLaunch);
-            }
-        }
-    }
-    function checkUrlMatch(url) {
-        url = String(url);
-        const patterns = [
-            { pattern: "/home/user/", shorthand: "user", type: "usr" },
-            { pattern: "/home/avatar/", shorthand: "avatar", type: "avtr" },
-            { pattern: "/home/world/", shorthand: "world", type: "wrld" },
-            { pattern: "/home/group/", shorthand: "group", type: "grp" }
-        ];
-
-        console.log(`Checking URL: ${url}`);
-
-        for (let { pattern, shorthand, type } of patterns) {
-            if (url.includes(pattern)) {
-                console.log(`URL matches pattern: ${pattern}`);
-                return { matched: true, pattern: shorthand, type: type };
-            }
-        }
-
-        console.log("URL does not match any of the patterns.");
-        return { matched: false, pattern: null, type: null };
-    }
-
-
-    
     function addAvatarButton() {
         let navbarSection = document.querySelector('.navbar-section.left-nav');
 
@@ -393,7 +311,67 @@
             navbarSection.appendChild(GroupButton);
         }
     }
+    
+    //#region secondary page buttons
+    function VRCXOverrideLaunch() {
+        const result = checkUrlMatch(cachedURI);
+        const id = extractId(cachedURI, result.type);
+        if(result.matched)
+        {
+            let overrideSelector = document.querySelector('.tw-border-hr-line-color.tw-border-y-2.tw-w-full.tw-mb-0');
 
+            if (overrideSelector) {
+                let overrideLaunch = document.createElement('button');
+                overrideLaunch.id = 'OverrideLaunchVRCX';
+                overrideLaunch.innerText = 'Open cached link in VRCX';
+                overrideLaunch.style.border = '2px solid rgb(6, 75, 92)';
+                overrideLaunch.style.borderRadius = '4px';
+                overrideLaunch.style.background = 'rgb(6, 75, 92)';
+                overrideLaunch.style.color = 'rgb(106, 227, 249)';
+                overrideLaunch.style.padding = '5px';
+                overrideLaunch.style.boxSizing = 'border-box';
+                overrideLaunch.style.outline = 'none !important';
+                overrideLaunch.style.flex = '1 1 0%';
+
+                const uriPath = new URL(`vrcx://${result.pattern}/${id}`);
+
+                if(redirectAutoLaunch){
+                    window.open(uriPath, '_self');
+                }
+
+                overrideLaunch.onclick = function(event) {
+                    event.preventDefault();
+
+                    window.open(uriPath, '_self');
+                };
+
+                overrideSelector.insertAdjacentElement('afterend', overrideLaunch);
+            }
+        }
+    }
+    function addLaunchButton() {
+        let launchSelector = document.querySelector('.css-1qycygp.flex-shrink-1.text-left');
+
+        if (launchSelector) {
+            LaunchButton = document.createElement('button');
+            LaunchButton.id = 'OpenLaunchVRCX';
+            LaunchButton.innerText = 'Open in VRCX';
+
+            LaunchButton.classList.add('btn-primary', 'launch-btn', 'secondary-launch-btn', 'w-100', 'btn', 'btn-secondary');
+
+            LaunchButton.onclick = function(event) {
+                event.preventDefault();
+
+                const uriPath = new URL(`vrcx://world/${window.location.href}`);
+                window.open(uriPath, '_self');
+            };
+
+            launchSelector.appendChild(LaunchButton);
+        }
+    }
+    //#endregion
+
+    //#region Functions
     function extractId(url, idType) {
         if(idType === "usr" && getLegacyID(url).length === 10){
             return getLegacyID(url);
@@ -402,10 +380,44 @@
         const match = url.match(expression);
         return match ? match[1] : null;
     }
-
     function getLegacyID(input) {
         const parts = input.split("/");
         return parts.pop();
+    }
+
+    function removeButton(button) {
+        if (button) {
+            button.remove();
+        }
+    }
+
+    function debounce(fn, delay) {
+        return function(...args) {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => fn.apply(this, args), delay);
+        };
+    }
+
+    function checkUrlMatch(url) {
+        url = String(url);
+        const patterns = [
+            { pattern: "/home/user/", shorthand: "user", type: "usr" },
+            { pattern: "/home/avatar/", shorthand: "avatar", type: "avtr" },
+            { pattern: "/home/world/", shorthand: "world", type: "wrld" },
+            { pattern: "/home/group/", shorthand: "group", type: "grp" }
+        ];
+
+        console.log(`Checking URL: ${url}`);
+
+        for (let { pattern, shorthand, type } of patterns) {
+            if (url.includes(pattern)) {
+                console.log(`URL matches pattern: ${pattern}`);
+                return { matched: true, pattern: shorthand, type: type };
+            }
+        }
+
+        console.log("URL does not match any of the patterns.");
+        return { matched: false, pattern: null, type: null };
     }
 
     function addSVGIcon(button) {
@@ -416,5 +428,6 @@
             button.insertBefore(svgClone, button.firstChild);
         }
     }
+    //#endregion
     window.addEventListener('load', addButtonToNavbar);
 })();
