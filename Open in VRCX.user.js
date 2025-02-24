@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.4.7
+// @version      1.4.8
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
@@ -33,12 +33,12 @@
         title: 'Open In VRCX Settings',
         fields: {
             reloadTime: {
-                label: '<span title="Set how often the page reloads in milliseconds. Lower values may cause excessive reloads and page slowdowns.">Button Polling Interval (Milliseconds) ⓘ</span>',
+                label: '<span title="Set the interval (in milliseconds) between button creation checks. Lower values may cause excessive reloads and slowdowns.">Button Polling Interval (ms) ⓘ</span>',
                 type: 'int',
                 default: 100
             },
             redirectAutoLaunch: {
-                label: '<span title="Automatically open urls in VRCX when redirected to the login screen.">Automatically Open On Redirect ⓘ</span>',
+                label: '<span title="Automatically open urls in VRCX when redirected to the login screen.">Automatically open on redirect ⓘ</span>',
                 type: 'checkbox',
                 default: false
             },
@@ -47,6 +47,7 @@
                 type: 'checkbox',
                 default: false
             }
+
         },
         css: `
         #html {
