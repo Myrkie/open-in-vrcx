@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.4.6
+// @version      1.4.7
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
@@ -22,20 +22,28 @@
     let debounceTimer;
     
     //#region settings
+    
     let reloadTime;
     let redirectAutoLaunch;
+    let autoLaunchInstance;
+    
     // noinspection JSUnusedGlobalSymbols
     GM_config.init({
         id: 'OpenInVRCXSettings',
         title: 'Open In VRCX Settings',
         fields: {
             reloadTime: {
-                label: '<span title="Set how often the page reloads in milliseconds. Lower values may cause excessive reloads and page slowdowns.">Reload Interval (Milliseconds) ⓘ</span>',
+                label: '<span title="Set how often the page reloads in milliseconds. Lower values may cause excessive reloads and page slowdowns.">Button Polling Interval (Milliseconds) ⓘ</span>',
                 type: 'int',
                 default: 100
             },
             redirectAutoLaunch: {
-                label: '<span title="Auto open urls in VRCX when redirected to the login screen.">Auto Launch Redirect ⓘ</span>',
+                label: '<span title="Automatically open urls in VRCX when redirected to the login screen.">Automatically Open On Redirect ⓘ</span>',
+                type: 'checkbox',
+                default: false
+            },
+            autoLaunchInstance: {
+                label: '<span title="Automatically open /home/launch urls in VRCX.">Automatically open instances ⓘ</span>',
                 type: 'checkbox',
                 default: false
             }
@@ -101,6 +109,7 @@
             init: function () {
                 reloadTime = this.get('reloadTime');
                 redirectAutoLaunch = this.get('redirectAutoLaunch');
+                autoLaunchInstance = this.get('autoLaunchInstance');
                 console.log("Initialized Reload Time:", reloadTime);
 
                 const observer = new MutationObserver(debounce(() => {
@@ -121,6 +130,7 @@
     });
     //#endregion
     
+    //#region Buttons
     function addButtonToNavbar() {
         const currentURL = window.location.href;
         switch (true) {
@@ -136,7 +146,6 @@
             case currentURL.includes("/home/avatar/"):
                 if (!document.querySelector('#OpenAvatarinVRCX')) {
                     addAvatarButton();
-                    addAvatarSwapButton();
                 }
                 removeButton(GroupButton);
                 removeButton(UserButton);
@@ -231,33 +240,6 @@
             navbarSection.appendChild(AvatarButton);
         }
     }
-
-    function addAvatarSwapButton() {
-        let navbarSection = document.querySelector('.navbar-section.left-nav');
-
-        if (navbarSection) {
-            SwapButton = document.createElement('button');
-            SwapButton.id = 'SwapAvatarinVRCX';
-            SwapButton.innerText = 'Swap to Avatar in VRChat';
-
-            SwapButton.classList.add('p-2', 'btn', 'navbar-btn', 'medium');
-            addSVGIcon(SwapButton);
-            SwapButton.onclick = function(event) {
-                event.preventDefault();
-                
-                const avatarId = extractId(window.location.href, 'avtr');
-                if (!avatarId) {
-                    console.error("Avatar ID not found in URL");
-                    return;
-                }
-                const uriPath = new URL(`vrcx://switchavatar/${avatarId}`);
-                window.open(uriPath, '_self');
-            };
-
-            navbarSection.appendChild(SwapButton);
-        }
-    }
-
     function addWorldButton() {
         let navbarSection = document.querySelector('.navbar-section.left-nav');
 
@@ -311,6 +293,8 @@
             navbarSection.appendChild(GroupButton);
         }
     }
+
+    //#endregion
     
     //#region secondary page buttons
     function VRCXOverrideLaunch() {
@@ -323,7 +307,7 @@
             if (overrideSelector) {
                 let overrideLaunch = document.createElement('button');
                 overrideLaunch.id = 'OverrideLaunchVRCX';
-                overrideLaunch.innerText = 'Open cached link in VRCX';
+                overrideLaunch.innerText = 'Open link in VRCX';
                 overrideLaunch.style.border = '2px solid rgb(6, 75, 92)';
                 overrideLaunch.style.borderRadius = '4px';
                 overrideLaunch.style.background = 'rgb(6, 75, 92)';
@@ -358,11 +342,15 @@
             LaunchButton.innerText = 'Open in VRCX';
 
             LaunchButton.classList.add('btn-primary', 'launch-btn', 'secondary-launch-btn', 'w-100', 'btn', 'btn-secondary');
+            const uriPath = new URL(`vrcx://world/${window.location.href}`);
+            
+            if(autoLaunchInstance){
+                window.open(uriPath, '_self');
+            }
 
             LaunchButton.onclick = function(event) {
                 event.preventDefault();
 
-                const uriPath = new URL(`vrcx://world/${window.location.href}`);
                 window.open(uriPath, '_self');
             };
 
@@ -371,7 +359,7 @@
     }
     //#endregion
 
-    //#region Functions
+    //#region functions
     function extractId(url, idType) {
         if(idType === "usr" && getLegacyID(url).length === 10){
             return getLegacyID(url);
