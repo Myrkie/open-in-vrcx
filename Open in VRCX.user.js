@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.4.9
+// @version      1.5.0
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
@@ -20,13 +20,10 @@
     const cachedURI = window.location.href;
     let UserButton, AvatarButton, WorldButton, GroupButton, SwapButton, LaunchButton, overrideLaunch;
     let debounceTimer;
-    
     //#region settings
-    
     let reloadTime;
     let redirectAutoLaunch;
     let autoLaunchInstance;
-    
     // noinspection JSUnusedGlobalSymbols
     GM_config.init({
         id: 'OpenInVRCXSettings',
@@ -130,7 +127,6 @@
         GM_config.open();
     });
     //#endregion
-    
     //#region Buttons
     function addButtonToNavbar() {
         const currentURL = window.location.href;
@@ -203,7 +199,6 @@
 
             UserButton.onclick = function(event) {
                 event.preventDefault();
-                
                 const userId = extractId(window.location.href, 'usr');
                 if (!userId) {
                     console.error("User ID not found in URL");
@@ -228,7 +223,6 @@
             addSVGIcon(AvatarButton);
             AvatarButton.onclick = function(event) {
                 event.preventDefault();
-                
                 const avatarId = extractId(window.location.href, 'avtr');
                 if (!avatarId) {
                     console.error("Avatar ID not found in URL");
@@ -254,7 +248,6 @@
 
             WorldButton.onclick = function(event) {
                 event.preventDefault();
-                
                 const worldId = extractId(window.location.href, 'wrld');
                 if (!worldId) {
                     console.error("World ID not found in URL");
@@ -281,7 +274,7 @@
 
             GroupButton.onclick = function(event) {
                 event.preventDefault();
-                
+
                 const groupId = extractId(window.location.href, 'grp');
                 if (!groupId) {
                     console.error("Group ID not found in URL");
@@ -296,7 +289,6 @@
     }
 
     //#endregion
-    
     //#region secondary page buttons
     function VRCXOverrideLaunch() {
         const result = checkUrlMatch(cachedURI);
@@ -362,16 +354,34 @@
 
     //#region functions
     function extractId(url, idType) {
-        if(idType === "usr" && getLegacyID(url).length === 10){
-            return getLegacyID(url);
+        url = url.replace(/\/+$/, "");
+
+        const parts = url.split("/").filter(Boolean);
+        let lastPart = parts.pop();
+
+        if (idType === "wrld") {
+            if (lastPart.toLowerCase() === "info") {
+                lastPart = parts.pop();
+            }
+            return lastPart || null;
         }
-        let expression = new RegExp(`(${idType}_[a-zA-Z0-9-]+)(?:/|$)`);
-        const match = url.match(expression);
-        return match ? match[1] : null;
-    }
-    function getLegacyID(input) {
-        const parts = input.split("/");
-        return parts.pop();
+
+        if (idType === "avtr") {
+            if (lastPart.startsWith("avtr_")) {
+                return lastPart;
+            }
+            return lastPart || null;
+        }
+
+        if (idType === "usr") {
+            if (lastPart.startsWith("usr_")) {
+                return lastPart;
+            }
+            return lastPart || null;
+        }
+
+        console.error("No Parsable URL was found");
+        return null;
     }
 
     function removeButton(button) {
