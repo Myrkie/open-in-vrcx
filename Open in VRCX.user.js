@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open in VRCX
 // @namespace    http://tampermonkey.net/
-// @version      1.5.0
+// @version      1.5.1
 // @updateURL    https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @downloadURL  https://raw.githubusercontent.com/Myrkie/open-in-vrcx/mistress/Open%20in%20VRCX.user.js?
 // @description  Adds an "Open in VRCX" button to the tabs in the VRChat website;
@@ -289,7 +289,39 @@
     }
 
     //#endregion
-    //#region secondary page buttons
+    //#region home launch page buttons
+    function addLaunchButton() {
+        let launchSelector = document.querySelector('.css-1qycygp.flex-shrink-1.text-left');
+        if (launchSelector) {
+            LaunchButton = document.createElement('button');
+            LaunchButton.id = 'OpenLaunchVRCX';
+            LaunchButton.innerText = 'Open in VRCX';
+
+            LaunchButton.classList.add('btn-primary', 'launch-btn', 'secondary-launch-btn', 'w-100', 'btn', 'btn-secondary');
+
+            const wrldID = extractId(window.location.href, 'launchhome');
+            if (!wrldID) {
+                console.error("Wrld ID not found in Launch URL");
+                return;
+            }
+
+            const uriPath = new URL(`vrcx://world/${wrldID}`);
+
+            if(autoLaunchInstance){
+                window.open(uriPath, '_self');
+            }
+
+            LaunchButton.onclick = function(event) {
+                event.preventDefault();
+
+                window.open(uriPath, '_self');
+            };
+
+            launchSelector.appendChild(LaunchButton);
+        }
+    }
+    //#endregion
+    //#region login page buttons
     function VRCXOverrideLaunch() {
         const result = checkUrlMatch(cachedURI);
         const id = extractId(cachedURI, result.type);
@@ -326,38 +358,21 @@
             }
         }
     }
-    function addLaunchButton() {
-        let launchSelector = document.querySelector('.css-1qycygp.flex-shrink-1.text-left');
-
-        if (launchSelector) {
-            LaunchButton = document.createElement('button');
-            LaunchButton.id = 'OpenLaunchVRCX';
-            LaunchButton.innerText = 'Open in VRCX';
-
-            LaunchButton.classList.add('btn-primary', 'launch-btn', 'secondary-launch-btn', 'w-100', 'btn', 'btn-secondary');
-            const uriPath = new URL(`vrcx://world/${window.location.href}`);
-            
-            if(autoLaunchInstance){
-                window.open(uriPath, '_self');
-            }
-
-            LaunchButton.onclick = function(event) {
-                event.preventDefault();
-
-                window.open(uriPath, '_self');
-            };
-
-            launchSelector.appendChild(LaunchButton);
-        }
-    }
     //#endregion
-
     //#region functions
     function extractId(url, idType) {
         url = url.replace(/\/+$/, "");
 
         const parts = url.split("/").filter(Boolean);
         let lastPart = parts.pop();
+
+        if (idType === "usr") {
+            return lastPart;
+        }
+
+        if (idType === "avtr") {
+            return lastPart;
+        }
 
         if (idType === "wrld") {
             if (lastPart.toLowerCase() === "info") {
@@ -366,18 +381,13 @@
             return lastPart || null;
         }
 
-        if (idType === "avtr") {
-            if (lastPart.startsWith("avtr_")) {
-                return lastPart;
-            }
-            return lastPart || null;
+        if (idType === "grp") {
+            return lastPart;
         }
 
-        if (idType === "usr") {
-            if (lastPart.startsWith("usr_")) {
-                return lastPart;
-            }
-            return lastPart || null;
+
+        if (idType === "launchhome") {
+            return window.location.href;
         }
 
         console.error("No Parsable URL was found");
